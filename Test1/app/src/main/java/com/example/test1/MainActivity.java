@@ -27,8 +27,10 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.button0).setOnClickListener(new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            if(num<=52427)
-            num=num*10;
+            if(num<=52427) {
+                num = num * 10;
+                Log.i("Btn0", "Done");
+            }
             flag=false;
             tv.setText(String.valueOf(num));
         }
@@ -36,8 +38,10 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.button1).setOnClickListener(new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            if(num<=52427)
-            num=num*10+1;
+            if(num<=52427) {
+                num = num * 10 + 1;
+                Log.i("Btn1", "Done");
+            }
             flag=false;
             tv.setText(String.valueOf(num));
         }
@@ -45,8 +49,10 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.button2).setOnClickListener(new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            if(num<=52427)
-            num=num*10+2;
+            if(num<=52427) {
+                num = num * 10 + 2;
+                Log.i("Btn2", "Done");
+            }
             flag=false;
             tv.setText(String.valueOf(num));
         }
@@ -54,8 +60,10 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.button3).setOnClickListener(new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            if(num<=52427)
-            num=num*10+3;
+            if(num<=52427) {
+                num = num * 10 + 3;
+                Log.i("Btn3", "Done");
+            }
             flag=false;
             tv.setText(String.valueOf(num));
         }
@@ -63,8 +71,10 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.button4).setOnClickListener(new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            if(num<=52427)
-            num=num*10+4;
+            if(num<=52427) {
+                num = num * 10 + 4;
+                Log.i("Btn4", "Done");
+            }
             flag=false;
             tv.setText(String.valueOf(num));
         }
@@ -72,8 +82,10 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.button5).setOnClickListener(new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            if(num<=52427)
-            num=num*10+5;
+            if(num<=52427) {
+                num = num * 10 + 5;
+                Log.i("Btn5", "Done");
+            }
             flag=false;
             tv.setText(String.valueOf(num));
         }
@@ -81,8 +93,10 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.button6).setOnClickListener(new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            if(num<=52427)
-            num=num*10+6;
+            if(num<=52427) {
+                num = num * 10 + 6;
+                Log.i("Btn6", "Done");
+            }
             flag=false;
             tv.setText(String.valueOf(num));
         }
@@ -90,8 +104,10 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.button7).setOnClickListener(new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            if(num<=52427)
-            num=num*10+7;
+            if(num<=52427) {
+                num = num * 10 + 7;
+                Log.i("Btn7", "Done");
+            }
             flag=false;
             tv.setText(String.valueOf(num));
         }
@@ -99,8 +115,10 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.button8).setOnClickListener(new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            if(num<=52427)
-            num=num*10+8;
+            if(num<=52427){
+                num=num*10+8;
+                Log.i("Btn8", "Done");
+            }
             flag=false;
             tv.setText(String.valueOf(num));
         }
@@ -108,8 +126,10 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.button9).setOnClickListener(new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            if(num<=52427)
-            num=num*10+9;
+            if(num<=52427) {
+                num = num * 10 + 9;
+                Log.i("Btn9", "Done");
+            }
             flag=false;
             tv.setText(String.valueOf(num));
         }
@@ -117,8 +137,14 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.CLR).setOnClickListener(new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            num=0;
-            bin="";
+            if(num!=0) {
+                num = 0;
+                Log.i("BtnCLR", "Clear Done");
+            }
+            if(bin!="") {
+                bin = "";
+                Log.i("BtnCLR", "Clear Done");
+            }
             flag=false;
             tv.setText(String.valueOf(num));
         }
@@ -133,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
                     bin=num%2+bin;
                     num=num/2;
                 }
+                Log.i("BtnGO", "Conversion Succeeded");
             }
             num=0;
             tv.setText(bin);
@@ -141,10 +168,14 @@ public class MainActivity extends AppCompatActivity {
         ch1.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener(){
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            if (ch1.isChecked())
+            if (ch1.isChecked()) {
                 findViewById(R.id.imageView).setVisibility(View.VISIBLE);
-            else
+                Log.i("CheckBox", "Now picture visible");
+            }
+            else {
                 findViewById(R.id.imageView).setVisibility(View.INVISIBLE);
+                Log.i("CheckBox", "Now picture invisible");
+            }
         }
     });
     Log.i("Nice", "Run Successfully!");
