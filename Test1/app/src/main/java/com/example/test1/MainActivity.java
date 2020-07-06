@@ -7,16 +7,23 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.ImageView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+
+import java.lang.reflect.Parameter;
 
 public class MainActivity extends AppCompatActivity {
     static boolean flag=false;
     static int num = 0;
     static String bin="";
+    private CheckBox ch1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final TextView tv = findViewById(R.id.Display);
+        ch1=(CheckBox)findViewById(R.id.checkBox);
     findViewById(R.id.button0).setOnClickListener(new View.OnClickListener(){
         @Override
         public void onClick(View v) {
@@ -119,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.GO).setOnClickListener(new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            if(flag==false){
+            if(!flag){
                 bin="";
                 flag=true;
                 while(num!=0) {
@@ -129,6 +136,15 @@ public class MainActivity extends AppCompatActivity {
             }
             num=0;
             tv.setText(bin);
+        }
+    });
+        ch1.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener(){
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            if (ch1.isChecked())
+                findViewById(R.id.imageView).setVisibility(View.VISIBLE);
+            else
+                findViewById(R.id.imageView).setVisibility(View.INVISIBLE);
         }
     });
     Log.i("Nice", "Run Successfully!");
