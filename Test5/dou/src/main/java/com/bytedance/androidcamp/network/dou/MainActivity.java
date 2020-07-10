@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRv;
     private List<Video> mVideos = new ArrayList<>();
     public Uri mSelectedImage;
-    public Uri mSelectedVideo;
+    private Uri mSelectedVideo;
     public Button mBtn;
     private Button mBtnRefresh;
 
@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private MultipartBody.Part getMultipartFromUri(String name, Uri uri) {
-        File f = new File(ResourceUtils.getFilePath(getApplicationContext(), uri));
+        File f = new File(ResourceUtils.getRealPath(MainActivity.this, uri));
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), f);
         return MultipartBody.Part.createFormData(name, f.getName(), requestFile);
     }
@@ -183,10 +183,10 @@ public class MainActivity extends AppCompatActivity {
     private void postVideo() {
         mBtn.setText("POSTING...");
         mBtn.setEnabled(false);
-        MultipartBody.Part coverImagePart = getMultipartFromUri("image", mSelectedImage);
+        MultipartBody.Part coverImagePart = getMultipartFromUri("cover_image", mSelectedImage);
         MultipartBody.Part videoPart = getMultipartFromUri("video", mSelectedVideo);
         //@TODO 4下面的id和名字替换成自己的
-        miniDouyinService.postVideo("3180105252", "ZimuSama", coverImagePart, videoPart).enqueue(
+        miniDouyinService.postVideo("19975279797", "Zimu", coverImagePart, videoPart).enqueue(
                 new Callback<PostVideoResponse>() {
                     @Override
                     public void onResponse(Call<PostVideoResponse> call, Response<PostVideoResponse> response) {
@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(MainActivity.this, response.body().toString(), Toast.LENGTH_SHORT)
                                     .show();
                         }
-                        mBtn.setText(R.string.select_a_video);
+                        mBtn.setText(R.string.select_an_image);
                         mBtn.setEnabled(true);
                     }
 
@@ -216,11 +216,11 @@ public class MainActivity extends AppCompatActivity {
                 if (response.body() != null && response.body().videos != null) {
                     mVideos = response.body().videos;
                     //@TODO  5服务端没有做去重，拿到列表后，可以在端侧根据自己的id，做列表筛选。
-                    //for(int i=0;i<mVideos.size();){
-                    //    if(mVideos.get(i).studentId!="19975279797")
-                    //        mVideos.remove(i);
-                    //    else i++;
-                    //}
+                    for(int i=0;i<mVideos.size();){
+                        if(!mVideos.get(i).studentId.equals("19975279797"))
+                            mVideos.remove(i);
+                        else i++;
+                    }
                     mRv.getAdapter().notifyDataSetChanged();
                 }
                 mBtnRefresh.setText(R.string.refresh_feed);
