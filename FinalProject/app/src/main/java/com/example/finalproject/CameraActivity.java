@@ -1,20 +1,13 @@
 package com.example.finalproject;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
-import android.hardware.Camera.PictureCallback;
 import android.media.MediaRecorder;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.app.Activity;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
@@ -24,6 +17,12 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
 public class CameraActivity extends Activity {
 
     private String tag ="CameraActivity";
@@ -31,11 +30,11 @@ public class CameraActivity extends Activity {
     private SurfaceHolder surfaceHolder;
     private Camera camera;
     private MediaRecorder mediaRecorder;
-    private Button photoButton;  //拍照按钮
     private Button vedioButton;  //摄像按钮
     private TextView timeTextView;
     private List<Camera.Size> vsizes;
-    private List<Camera.Size> psizes;
+    private int maxVWidth=0;
+    private int maxVHeight=0;
 
     protected boolean isPreview = false; //摄像区域是否准备良好
     private boolean isRecording = true; // true表示没有录像，点击开始；false表示正在录像，点击暂停
@@ -58,7 +57,7 @@ public class CameraActivity extends Activity {
     //初始化摄像头
     private void initCamera() {
         mRecVedioPath = new File(Environment.getExternalStorageDirectory()
-                .getAbsolutePath() + "/mahc/video/temp/");
+                .getAbsolutePath()+ "/DCIM/Camera/");
         if (!mRecVedioPath.exists()) {
             mRecVedioPath.mkdirs();
         }
@@ -71,13 +70,20 @@ public class CameraActivity extends Activity {
                 try {
                     camera = Camera.open();
                     vsizes=camera.getParameters().getSupportedVideoSizes();
-                    psizes=camera.getParameters().getSupportedPictureSizes();
+                    for(int i=0;i<vsizes.size();i++)
+                        if(vsizes.get(i).width>maxVWidth){
+                            maxVWidth=vsizes.get(i).width;
+                            maxVHeight=vsizes.get(i).height;
+                        }
                     //设置Camera的角度/方向
                     camera.setDisplayOrientation(90);
                     Camera.Parameters parameters = camera.getParameters();
-                    parameters.setPreviewFrameRate(30); // 每秒5帧
+                    parameters.setPreviewFrameRate(30); // 每秒30帧
                     parameters.setPictureFormat(ImageFormat.JPEG);// 设置照片的输出格式
                     parameters.set("jpeg-quality", 100);// 照片质量
+                    List<String> focusModes = parameters.getSupportedFocusModes();
+                    if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO))
+                        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
                     camera.setParameters(parameters);
                     camera.setPreviewDisplay(holder);
                     isPreview = true;
@@ -118,26 +124,18 @@ public class CameraActivity extends Activity {
     private void initViews() {
         timeTextView = (TextView) findViewById(R.id.camera_time);
         timeTextView.setVisibility(View.GONE);
-        photoButton = (Button) findViewById(R.id.camera_photo);
         vedioButton = (Button) findViewById(R.id.camera_vedio);
         ButtonOnClickListener onClickListener = new ButtonOnClickListener();
-        photoButton.setOnClickListener(onClickListener);
         vedioButton.setOnClickListener(onClickListener);
     }
 
     class ButtonOnClickListener implements OnClickListener{
-
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.camera_vedio:
                     //点击开始录像
                     if(isRecording){
-                        if (isPreview) {
-                            camera.stopPreview();
-                            camera.release();
-                            camera = null;
-                        }
                         second = 0;
                         minute = 0;
                         hour = 0;
@@ -147,6 +145,10 @@ public class CameraActivity extends Activity {
                         }else {
                             mediaRecorder.reset();
                         }
+                        camera.unlock();
+                        mediaRecorder.setCamera(camera);
+                        mediaRecorder.setVideoEncodingBitRate(20*1024*1024);
+                        mediaRecorder.setOrientationHint(90);
                         //表面设置显示记录媒体（视频）的预览
                         mediaRecorder.setPreviewDisplay(surfaceHolder.getSurface());
                         //开始捕捉和编码数据到setOutputFile（指定的文件）
@@ -160,7 +162,7 @@ public class CameraActivity extends Activity {
                         //设置audio的编码格式
                         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
                         //设置要捕获的视频的宽度和高度
-                        mediaRecorder.setVideoSize(vsizes.get(vsizes.size()-1).width, vsizes.get(vsizes.size()-1).height);
+                        mediaRecorder.setVideoSize(maxVWidth, maxVHeight);
                         // 设置要捕获的视频帧速率
                         mediaRecorder.setVideoFrameRate(30);
                         try {
@@ -182,79 +184,30 @@ public class CameraActivity extends Activity {
                         Log.e(tag, "=====开始录制视频=====");
                     }else {
                         //点击停止录像
-                        bool = false;
-                        mediaRecorder.stop();
-                        timeTextView.setText(FormatUtil.format(hour)+":"+FormatUtil.format(minute)+":"+ FormatUtil.format(second));
-                        mediaRecorder.release();
-                        mediaRecorder = null;
-                        FormatUtil.videoRename(mRecAudioFile);
-                        Log.e(tag, "=====录制完成，已保存=====");
-                        isRecording = !isRecording;
-                        try {
-                            camera = Camera.open();
-                            camera.setDisplayOrientation(90);
-                            Camera.Parameters parameters = camera.getParameters();
-//						parameters.setPreviewFrameRate(5); // 每秒5帧
-                            parameters.setPictureFormat(ImageFormat.JPEG);// 设置照片的输出格式
-                            parameters.set("jpeg-quality", 100);// 照片质量
-                            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-                            camera.setParameters(parameters);
-                            camera.setPreviewDisplay(surfaceHolder);
-                            camera.startPreview();
-                            isPreview = true;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    break;
-
-                case R.id.camera_photo:
-                    if (mediaRecorder != null) {
+                        String fileName = new SimpleDateFormat("yyyyMMddHHmmss")
+                                .format(new Date()) + ".mp4";
                         try {
                             bool = false;
+                            mediaRecorder.setPreviewDisplay(null);
                             mediaRecorder.stop();
                             timeTextView.setText(FormatUtil.format(hour) + ":" + FormatUtil.format(minute) + ":"
                                     + FormatUtil.format(second));
                             mediaRecorder.release();
+                            camera.lock();
+                            camera.setPreviewDisplay(surfaceHolder);
                             mediaRecorder = null;
-                            FormatUtil.videoRename(mRecAudioFile);
+                            FormatUtil.videoRename(mRecAudioFile,fileName);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                         isRecording = !isRecording;
                         Log.e(tag, "=====录制完成，已保存=====");
-                        try {
-                            camera = Camera.open();
-                            Camera.Parameters parameters = camera.getParameters();
-//						parameters.setPreviewFrameRate(5); // 每秒5帧
-                            parameters.setPictureFormat(ImageFormat.JPEG);// 设置照片的输出格式
-                            parameters.set("jpeg-quality", 100);// 照片质量
-                            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-                            camera.setParameters(parameters);
-                            camera.setDisplayOrientation(90);
-                            camera.setPreviewDisplay(surfaceHolder);
-                            camera.startPreview();
-                            isPreview = true;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    else if (camera != null) {
-                        Camera.Parameters parameters = camera.getParameters();
-                        parameters.set("jpeg-quality", 100);// 照片质量
-                        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-                        parameters.setPictureSize(psizes.get(psizes.size()-1).width, psizes.get(psizes.size()-1).height);
-                        camera.setParameters(parameters);
-                        camera.stopPreview();
-                        camera.startPreview();
-                        camera.takePicture(null, null, new PictureCallback() {
-                            @Override
-                            public void onPictureTaken(byte[] data, Camera camera) {
-                                //new SavePictureTask().execute(data);
-                                Log.e(tag,"=====拍照成功=====");
-                            }
-                        }); // 拍照
-                    }
+                        Intent videoIntent=new Intent(CameraActivity.this,VideoActivity.class);
+                        videoIntent.putExtra("Path", Environment.getExternalStorageDirectory()
+                                .getAbsolutePath()+ "/DCIM/Camera/"+fileName);
+                        videoIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        CameraActivity.this.startActivity(videoIntent);
+            }
                     break;
                 default:
                     break;
@@ -283,29 +236,9 @@ public class CameraActivity extends Activity {
             }
         }
     };
-
-
-
-    class SavePictureTask extends AsyncTask<byte[], String, Boolean> {
-        @Override
-        protected Boolean doInBackground(byte[]... params) {
-            String path = Environment.getExternalStorageDirectory()
-                    .getAbsolutePath() + "/DCIM/Camera/";
-            File out = new File(path);
-            if (!out.exists()) {
-                out.mkdirs();
-            }
-            File picture = new File(path+"/"+new Date().getTime()+".jpg");
-            try {
-                FileOutputStream fos = new FileOutputStream(picture.getPath());
-                fos.write(params[0]);
-                fos.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            Log.e(tag, "=====照片保存完成=====");
-            return true;
-        }
+    @Override
+    public void onRestart(){
+        super.onRestart();
+        finish();
     }
-
 }

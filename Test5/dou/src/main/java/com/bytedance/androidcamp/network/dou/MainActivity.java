@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                     mVideos = response.body().videos;
                     //@TODO  5服务端没有做去重，拿到列表后，可以在端侧根据自己的id，做列表筛选。
                     for(int i=0;i<mVideos.size();){
-                        if(!mVideos.get(i).studentId.equals("19975279797"))
+                        if(!mVideos.get(i).studentId.equals("666666"))
                             mVideos.remove(i);
                         else i++;
                     }

@@ -1,10 +1,8 @@
 package com.example.finalproject;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import android.os.Environment;
+
+import java.io.File;
 
 public class FormatUtil {
 
@@ -12,11 +10,9 @@ public class FormatUtil {
      * 将缓存文件夹的数据转存到vedio文件下
      * @param recAudioFile
      */
-    public static void videoRename(File recAudioFile) {
+    public static void videoRename(File recAudioFile,String fileName) {
         String path = Environment.getExternalStorageDirectory()
                 .getAbsolutePath()+ "/DCIM/Camera/";
-        String fileName = new SimpleDateFormat("yyyyMMddHHmmss")
-                .format(new Date()) + ".mp4";
         File out = new File(path);
         if (!out.exists()) {
             out.mkdirs();
