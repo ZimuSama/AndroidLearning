@@ -1,14 +1,19 @@
 package com.bytedance.androidcamp.network.dou.camera;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.media.MediaRecorder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
@@ -17,7 +22,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bytedance.androidcamp.network.dou.MainActivity;
 import com.bytedance.androidcamp.network.dou.R;
 import com.bytedance.androidcamp.network.dou.util.FormatUtil;
 
@@ -48,6 +55,7 @@ public class CameraActivity extends Activity {
     private int hour = 0;
     private int minute = 0;     //计时专用
     private int second = 0;
+    private int permissionCount=0;
 
     private File mRecVedioPath;
     private File mRecAudioFile;
@@ -56,6 +64,7 @@ public class CameraActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera);
+        permission();
         initCamera();
         initViews();
     }
@@ -123,6 +132,36 @@ public class CameraActivity extends Activity {
         //开发时建议设置
         //This method was deprecated in API level 11. this is ignored, this value is set automatically when needed.
         //surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+    }
+    private void permission(){
+        if (!checkPermissionAllGranted(mPermissionsArrays)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(mPermissionsArrays, REQUEST_PERMISSION);
+                CameraActivity.this.finish();
+            }
+        } else {
+            Toast.makeText(CameraActivity.this, "已经获取所有所需权限", Toast.LENGTH_SHORT).show();
+        }
+    }
+    private String[] mPermissionsArrays = new String[]{Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.RECORD_AUDIO};
+
+    private final static int REQUEST_PERMISSION = 123;
+
+    private boolean checkPermissionAllGranted(String[] permissions) {
+        // 6.0以下不需要
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
+        for (String permission : permissions) {
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                // 只要有一个权限没有被授予, 则直接返回 false
+                return false;
+            }
+        }
+        return true;
     }
 
     //初始化视图组件
